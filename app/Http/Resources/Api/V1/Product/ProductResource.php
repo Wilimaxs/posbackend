@@ -16,6 +16,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property mixed $selling_price_normal
  * @property mixed $selling_price_grocier
  * @property mixed $is_active
+ * @property mixed $cost_price
  *
  */
 class ProductResource extends JsonResource
@@ -49,6 +50,7 @@ class ProductResource extends JsonResource
                 : null,
 
             'price' => [
+                'cost' => (int) $this->cost_price,
                 'normal' => (float)$this->selling_price_normal,
                 'grocier' => $this->selling_price_grocier !== null
                     ? (float)$this->selling_price_grocier
