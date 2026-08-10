@@ -20,6 +20,7 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property mixed $payment_status
  * @property mixed $due_date
  * @property mixed $change_amount
+ * @property mixed $payment_method
  */
 class PaymentResource extends JsonResource
 {
@@ -97,6 +98,9 @@ class PaymentResource extends JsonResource
 
             'remaining_balance' =>
                 (int)$this->remaining_balance,
+
+            'payment_method' =>
+                $this->payment_method,
 
             'payment_status' =>
                 $this->payment_status,

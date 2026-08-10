@@ -77,6 +77,14 @@ class PaymentRequest extends FormRequest
                 'in:unpaid,partial,paid',
             ],
 
+            'payment_method' => [
+                'required',
+                /*
+                 * Todo: ganti setelah QRIS selesai: in:cash,qris
+                */
+                'in:cash',
+            ],
+
             'due_date' => [
                 'nullable',
                 'date',

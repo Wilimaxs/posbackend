@@ -28,6 +28,7 @@ class Sale extends Model
         'change_amount',
         'remaining_balance',
         'payment_status',
+        'payment_method',
         'due_date',
 
         'status',

@@ -163,6 +163,9 @@ class PaymentService
             'payment_status' =>
                 $data['payment_status'],
 
+            'payment_method' =>
+                $data['payment_method'],
+
             'due_date' =>
                 $data['due_date'] ?? null,
 

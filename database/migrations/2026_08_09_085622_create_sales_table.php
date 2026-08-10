@@ -17,6 +17,7 @@ return new class extends Migration {
             $table->foreignId('customer_id')->nullable()->constrained('customers')->cascadeOnUpdate()->nullOnDelete();
             $table->string('invoice_number', 50)->unique();
             $table->enum('customer_type', ['guest', 'member',]);
+            $table->enum('payment_method', ['cash', 'qris',])->default('cash');
             $table->decimal('total_before_discount', 15);
             $table->decimal('total_discount', 15)->default(0);
             $table->decimal('total_after_discount', 15);
@@ -35,6 +36,7 @@ return new class extends Migration {
             $table->index('customer_id');
             $table->index('user_id');
             $table->index('due_date');
+            $table->index(['store_id', 'payment_method',]);
         });
     }
 
