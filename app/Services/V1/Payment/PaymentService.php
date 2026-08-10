@@ -13,30 +13,32 @@ class PaymentService
 {
     public function __construct(
         private readonly PaymentNormalizerService $normalizerService,
-        private readonly PaymentStockService $stockService,
+        private readonly PaymentStockService      $stockService,
         private readonly PaymentValidationService $validationService,
-    ) {
+    )
+    {
     }
 
     /**
-     * @throws Throwable
-     * @return Sale
      * @param int $storeId
      * @param int $userId
      * @param array $data
+     * @return Sale
+     * @throws Throwable
      */
     public function createPayment(
-        int $storeId,
-        int $userId,
+        int   $storeId,
+        int   $userId,
         array $data
-    ): Sale {
+    ): Sale
+    {
 
         return DB::transaction(function () use (
             $storeId,
             $userId,
             $data
         ) {
-             // 1. Tentukan Guest / Member.
+            // 1. Tentukan Guest / Member.
             $customer = $this->validationService->getCustomer(
                 storeId: $storeId,
                 customerId: $data['customer_id'] ?? null,
@@ -108,13 +110,19 @@ class PaymentService
      * @throws Throwable
      */
     private function createSale(
-        int $storeId,
-        int $userId,
+        int       $storeId,
+        int       $userId,
         ?Customer $customer,
-        array $data
-    ): Sale {
+        array     $data
+    ): Sale
+    {
         $isMember =
             $customer !== null;
+
+        $changeAmount = max(
+            0,
+            (int)$data['paid_amount'] - (int)$data['total_after_discount']
+        );
 
         return Sale::create([
             'store_id' =>
@@ -146,6 +154,9 @@ class PaymentService
             'paid_amount' =>
                 $data['paid_amount'],
 
+            'change_amount' =>
+                $changeAmount,
+
             'remaining_balance' =>
                 $data['remaining_balance'],
 
@@ -175,9 +186,10 @@ class PaymentService
      * @throws Throwable
      */
     private function createSaleItems(
-        Sale $sale,
+        Sale  $sale,
         array $items
-    ): void {
+    ): void
+    {
         foreach ($items as $item) {
             SaleItem::create([
                 'sale_id' =>
@@ -235,10 +247,10 @@ class PaymentService
     private function generateInvoiceNumber(): string
     {
         return 'INV-'
-            .now()->format('Ymd')
-            .'-'
-            .Str::upper(
-                (string) Str::ulid()
+            . now()->format('Ymd')
+            . '-'
+            . Str::upper(
+                (string)Str::ulid()
             );
     }
 }

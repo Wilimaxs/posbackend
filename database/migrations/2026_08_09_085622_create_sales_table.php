@@ -21,6 +21,7 @@ return new class extends Migration {
             $table->decimal('total_discount', 15)->default(0);
             $table->decimal('total_after_discount', 15);
             $table->decimal('paid_amount', 15)->default(0);
+            $table->decimal('change_amount', 15)->nullable();
             $table->decimal('remaining_balance', 15)->default(0);
             $table->enum('payment_status', ['unpaid', 'partial', 'paid',])->default('unpaid');
             $table->date('due_date')->nullable();

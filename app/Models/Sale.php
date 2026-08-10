@@ -25,6 +25,7 @@ class Sale extends Model
         'total_after_discount',
 
         'paid_amount',
+        'change_amount',
         'remaining_balance',
         'payment_status',
         'due_date',
@@ -42,6 +43,7 @@ class Sale extends Model
             'total_after_discount' => 'decimal:2',
 
             'paid_amount' => 'decimal:2',
+            'change_amount' => 'decimal:2',
             'remaining_balance' => 'decimal:2',
 
             'due_date' => 'date',

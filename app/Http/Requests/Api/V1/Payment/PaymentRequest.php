@@ -189,10 +189,6 @@ class PaymentRequest extends FormRequest
                 'min:0',
             ],
 
-            /*
-             * Total item setelah diskon,
-             * juga langsung dari mobile.
-             */
             'items.*.subtotal_after_discount' => [
                 'required',
                 'integer',
