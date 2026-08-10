@@ -5,25 +5,47 @@ namespace App\Http\Resources\Api\V1\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property mixed $invoice_number
+ * @property mixed $store
+ * @property mixed $user
+ * @property mixed $customer
+ * @property mixed $customer_type
+ * @property mixed $created_at
+ * @property mixed $items
+ * @property mixed $total_discount
+ * @property mixed $total_after_discount
+ * @property mixed $paid_amount
+ * @property mixed $remaining_balance
+ * @property mixed $payment_status
+ * @property mixed $due_date
+ */
 class PaymentResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
         return [
-            'sale_id' =>
-                $this->id,
-
             'invoice_number' =>
                 $this->invoice_number,
 
+            'store' => [
+                'name' =>
+                    $this->store->name,
+
+                'address' =>
+                    $this->store->address,
+
+                'phone' =>
+                    $this->store->phone,
+            ],
+
+            'user' => [
+                'name' =>
+                    $this->user->name,
+            ],
+
             'customer' => $this->customer
                 ? [
-                    'id' =>
-                        $this->customer->id,
-
-                    'customer_code' =>
-                        $this->customer->customer_code,
-
                     'name' =>
                         $this->customer->name,
                 ]
@@ -32,55 +54,31 @@ class PaymentResource extends JsonResource
             'customer_type' =>
                 $this->customer_type,
 
+            'created_at' =>
+                $this->created_at?->toISOString(),
+
             'items' => $this->items->map(
                 function ($item) {
                     return [
-                        'product_id' =>
-                            $item->product_id,
-
                         'product_name' =>
                             $item->product_name,
-
-                        'sku' =>
-                            $item->sku,
 
                         'quantity' =>
                             (int)$item->quantity,
 
-                        'cost_price' =>
-                            (int)$item->cost_price,
-
                         'unit_price' =>
                             (int)$item->unit_price,
 
-                        'price_type' =>
-                            $item->price_type,
-
-                        'subtotal' =>
-                            (int)$item->subtotal,
-
                         'discount' =>
-                            $item->discount_id
-                                ? [
-                                'id' =>
-                                    $item->discount_id,
-
-                                'name' =>
-                                    $item->discount_name,
-
-                                'value' =>
-                                    (int)$item->discount_value,
-                            ]
+                            (int)$item->discount_value > 0
+                                ? (int)$item->discount_value
                                 : null,
 
                         'subtotal_after_discount' =>
                             (int)$item->subtotal_after_discount,
                     ];
                 }
-            ),
-
-            'total_before_discount' =>
-                (int)$this->total_before_discount,
+            )->values(),
 
             'total_discount' =>
                 (int)$this->total_discount,
@@ -99,15 +97,6 @@ class PaymentResource extends JsonResource
 
             'due_date' =>
                 $this->due_date?->format('Y-m-d'),
-
-            'status' =>
-                $this->status,
-
-            'paid_at' =>
-                $this->paid_at?->toISOString(),
-
-            'created_at' =>
-                $this->created_at?->toISOString(),
         ];
     }
 }

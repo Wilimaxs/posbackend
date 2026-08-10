@@ -94,6 +94,7 @@ class PaymentService
                 'items',
                 'customer',
                 'user',
+                'store',
             ]);
         }, 3);
     }
