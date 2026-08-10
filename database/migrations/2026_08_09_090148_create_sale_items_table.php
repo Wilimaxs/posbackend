@@ -23,7 +23,7 @@ return new class extends Migration {
             $table->decimal('unit_price', 15);
             $table->enum('price_type', ['normal', 'grocier',]);
             $table->decimal('subtotal', 15);
-            $table->foreignId('discount_id')->constrained('discounts')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->foreignId('discount_id')->nullable()->constrained('discounts')->cascadeOnUpdate()->cascadeOnDelete();
             $table->string('discount_name')->nullable();
             $table->decimal('discount_value', 15)->default(0);
             $table->decimal('subtotal_after_discount', 15);

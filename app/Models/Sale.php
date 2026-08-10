@@ -6,12 +6,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @method static create(array $array)
+ */
 class Sale extends Model
 {
 
     protected $fillable = [
         'store_id',
-        'cashier_id',
+        'user_id',
         'customer_id',
 
         'invoice_number',
@@ -51,10 +54,9 @@ class Sale extends Model
         return $this->belongsTo(Store::class);
     }
 
-    public function cashier(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'cashier_id'
-        );
+        return $this->belongsTo(User::class);
     }
 
     public function customer(): BelongsTo
