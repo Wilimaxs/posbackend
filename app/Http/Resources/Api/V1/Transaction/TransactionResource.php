@@ -5,15 +5,14 @@ namespace App\Http\Resources\Api\V1\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
+/**
+ * @property mixed $total_after_discount
+ */
 class TransactionResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
         return [
-            /*
-             * invoice_number sekaligus menjadi identifier
-             * untuk membuka detail transaksi.
-             */
             'invoice_number' =>
                 $this->invoice_number,
 

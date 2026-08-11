@@ -89,9 +89,6 @@ class TransactionController extends Controller
         );
     }
 
-    /*
-     * GET /api/v1/transactions/{invoiceNumber}
-     */
     public function show(
         Request $request,
         string $invoiceNumber
@@ -106,12 +103,6 @@ class TransactionController extends Controller
                     invoiceNumber: $invoiceNumber,
                 );
 
-        /*
-         * Reuse response yang sama dengan payment.
-         *
-         * Jadi mobile tidak perlu mempunyai dua
-         * model detail transaksi yang berbeda.
-         */
         return ApiResponse::success(
             data: PaymentResource::make(
                 $sale

@@ -21,11 +21,23 @@ use Illuminate\Http\Resources\Json\JsonResource;
  * @property mixed $due_date
  * @property mixed $change_amount
  * @property mixed $payment_method
+ * @property mixed $receivablePayments
  */
 class PaymentResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $installmentPaidAmount =
+            (int)$this->receivablePayments->sum('amount');
+
+        $initialPayment = max(
+            0,
+            (int)$this->paid_amount
+            - $installmentPaidAmount
+            - (int)($this->change_amount ?? 0)
+        );
+
+
         return [
             'invoice_number' =>
                 $this->invoice_number,
@@ -82,6 +94,12 @@ class PaymentResource extends JsonResource
                 }
             )->values(),
 
+            'initial_payment' =>
+                $initialPayment,
+
+            'installment_paid_amount' =>
+                $installmentPaidAmount,
+
             'total_discount' =>
                 (int)$this->total_discount,
 
@@ -93,7 +111,7 @@ class PaymentResource extends JsonResource
 
             'change_amount' =>
                 $this->change_amount !== null
-                    ? (int) $this->change_amount
+                    ? (int)$this->change_amount
                     : null,
 
             'remaining_balance' =>
@@ -107,6 +125,27 @@ class PaymentResource extends JsonResource
 
             'due_date' =>
                 $this->due_date?->format('Y-m-d'),
+
+            'payment_history' =>
+                $this->receivablePayments
+                    ->map(function ($payment) {
+                        return [
+                            'amount' =>
+                                (int)$payment->amount,
+
+                            'paid_at' =>
+                                $payment->paid_at?->toISOString(),
+
+                            'user' => [
+                                'name' =>
+                                    $payment->user?->name,
+                            ],
+
+                            'notes' =>
+                                $payment->notes,
+                        ];
+                    })
+                    ->values(),
         ];
     }
 }
