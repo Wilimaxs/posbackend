@@ -19,13 +19,11 @@ class CustomerController extends Controller
 
     public function index(Request $request): JsonResponse
     {
-        // Sementara hardcode karena login belum dibuat.
         $storeId = 1;
 
         $customers = $this->customerService->getList(
             storeId: $storeId,
             search: $request->string('search')->toString() ?: null,
-            perPage: $request->integer('per_page') ?: 20,
         );
 
         return ApiResponse::success(
