@@ -19,7 +19,6 @@ class CheckoutController extends Controller
     public function preview(
         CheckoutRequest $request
     ): JsonResponse {
-        // Sementara hardcode karena login belum dibuat.
         $storeId = 1;
 
         $preview = $this->checkoutService->preview(
