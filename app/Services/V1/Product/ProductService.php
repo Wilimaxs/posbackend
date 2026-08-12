@@ -11,7 +11,6 @@ class ProductService
         int     $storeId,
         ?string $search = null,
         ?int    $categoryId = null,
-        int     $perPage = 20
     ): LengthAwarePaginator
     {
         return Product::query()
@@ -20,7 +19,12 @@ class ProductService
                 'productStocks' => function ($query) use ($storeId) {
                     $query
                         ->where('store_id', $storeId)
-                        ->with('discount');
+                        ->with('discount', function ($query) {
+                            $query
+                                ->where('is_active', true)
+                                ->where('starts_date', '<=', now())
+                                ->where('ends_date', '>=', now());
+                        });
                 },
             ])
             ->where('is_active', true)
@@ -39,6 +43,6 @@ class ProductService
                 $query->where('category_id', $categoryId);
             })
             ->orderBy('name')
-            ->paginate($perPage);
+            ->paginate(20);
     }
 }

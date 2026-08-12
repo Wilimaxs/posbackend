@@ -25,7 +25,6 @@ class ProductController extends Controller
             storeId: $storeId,
             search: $request->string('search')->toString() ?: null,
             categoryId: $request->integer('category_id') ?: null,
-            perPage: $request->integer('per_page') ?: 20,
         );
 
         return ApiResponse::success(
