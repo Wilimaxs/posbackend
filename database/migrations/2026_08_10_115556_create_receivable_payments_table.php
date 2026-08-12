@@ -14,13 +14,11 @@ return new class extends Migration {
             $table->id();
             $table->foreignId('sale_id')->constrained('sales')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate()->restrictOnDelete();
-            $table->decimal('amount', 15);
-            $table->timestamp('paid_at');
+            $table->decimal('amount', 15); // uang cicilan
             $table->text('notes')->nullable();
-            $table->timestamps();
+            $table->timestamps(); // created_at nanti dipake untuk waktu cicilan dibayar
 
-            $table->index(['sale_id', 'paid_at',]);
-            $table->index('paid_at');
+            $table->index(['sale_id', 'created_at',]);
         });
     }
 

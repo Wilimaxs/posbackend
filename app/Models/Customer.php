@@ -11,7 +11,6 @@ class Customer extends Model
         'store_id',
         'customer_code',
         'name',
-        'email',
         'phone',
         'address',
         'notes',

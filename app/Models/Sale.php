@@ -6,9 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-/**
- * @method static create(array $array)
- */
+
 class Sale extends Model
 {
 
@@ -19,16 +17,13 @@ class Sale extends Model
 
         'invoice_number',
         'customer_type',
+        'payment_method',
 
-        'total_before_discount',
-        'total_discount',
-        'total_after_discount',
-
-        'paid_amount',
+        'initial_payment',
         'change_amount',
         'remaining_balance',
+
         'payment_status',
-        'payment_method',
         'due_date',
 
         'status',
@@ -39,11 +34,7 @@ class Sale extends Model
     protected function casts(): array
     {
         return [
-            'total_before_discount' => 'decimal:2',
-            'total_discount' => 'decimal:2',
-            'total_after_discount' => 'decimal:2',
-
-            'paid_amount' => 'decimal:2',
+            'initial_payment' => 'decimal:2',
             'change_amount' => 'decimal:2',
             'remaining_balance' => 'decimal:2',
 

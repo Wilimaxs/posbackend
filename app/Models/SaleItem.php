@@ -2,13 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * @method static create(array $array)
- */
 class SaleItem extends Model
 {
 
@@ -27,13 +23,9 @@ class SaleItem extends Model
         'unit_price',
         'price_type',
 
-        'subtotal',
-
         'discount_id',
         'discount_name',
         'discount_value',
-
-        'subtotal_after_discount',
     ];
 
 
@@ -44,12 +36,7 @@ class SaleItem extends Model
 
             'cost_price' => 'decimal:2',
             'unit_price' => 'decimal:2',
-
-            'subtotal' => 'decimal:2',
-
             'discount_value' => 'decimal:2',
-
-            'subtotal_after_discount' => 'decimal:2',
         ];
     }
 

@@ -11,7 +11,6 @@ class ReceivablePayment extends Model
         'sale_id',
         'user_id',
         'amount',
-        'paid_at',
         'notes',
     ];
 
@@ -19,7 +18,6 @@ class ReceivablePayment extends Model
     {
         return [
             'amount' => 'decimal:2',
-            'paid_at' => 'datetime',
         ];
     }
 

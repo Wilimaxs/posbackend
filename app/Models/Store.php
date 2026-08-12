@@ -21,7 +21,7 @@ class Store extends Model
         ];
     }
 
-    public function users(): hasMany
+    public function users(): HasMany
     {
         return $this->hasMany(User::class);
     }

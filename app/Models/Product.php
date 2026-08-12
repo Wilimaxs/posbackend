@@ -32,14 +32,12 @@ class Product extends Model
         ];
     }
 
-    public
-    function category(): belongsTo
+    public function category(): BelongsTo
     {
         return $this->belongsTo(Category::class);
     }
 
-    public
-    function productStocks(): HasMany
+    public function productStocks(): HasMany
     {
         return $this->hasMany(ProductStock::class);
     }

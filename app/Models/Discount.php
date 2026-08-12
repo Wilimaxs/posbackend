@@ -13,10 +13,9 @@ class Discount extends Model
         'name',
         'description',
         'discount_value',
-        'minimum_purchase',
         'customer_scope',
-        'start_date',
-        'end_date',
+        'starts_date',
+        'ends_date',
         'is_active',
     ];
 
@@ -24,7 +23,6 @@ class Discount extends Model
     {
         return [
             'discount_value' => 'decimal:2',
-            'minimum_purchase' => 'decimal:2',
             'starts_date' => 'datetime',
             'ends_date' => 'datetime',
             'is_active' => 'boolean',

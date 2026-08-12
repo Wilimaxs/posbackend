@@ -19,18 +19,13 @@ return new class extends Migration {
             $table->string('barcode')->nullable();
             $table->string('unit')->default('pcs');
             $table->unsignedInteger('quantity');
-            $table->decimal('cost_price', 15);
-            $table->decimal('unit_price', 15);
-            $table->enum('price_type', ['normal', 'grocier',]);
-            $table->decimal('subtotal', 15);
-            $table->foreignId('discount_id')->nullable()->constrained('discounts')->cascadeOnUpdate()->cascadeOnDelete();
+            $table->decimal('cost_price', 15); // modal
+            $table->decimal('unit_price', 15); // dijual 1pcs
+            $table->enum('price_type', ['normal', 'grocier',]); // tipe harga yang dijual
+            $table->foreignId('discount_id')->nullable()->constrained('discounts')->cascadeOnUpdate()->nullOnDelete();
             $table->string('discount_name')->nullable();
             $table->decimal('discount_value', 15)->default(0);
-            $table->decimal('subtotal_after_discount', 15);
             $table->timestamps();
-
-            $table->index('sale_id');
-            $table->index('product_id');
         });
     }
 

@@ -18,24 +18,19 @@ return new class extends Migration {
             $table->string('invoice_number', 50)->unique();
             $table->enum('customer_type', ['guest', 'member',]);
             $table->enum('payment_method', ['cash', 'qris',])->default('cash');
-            $table->decimal('total_before_discount', 15);
-            $table->decimal('total_discount', 15)->default(0);
-            $table->decimal('total_after_discount', 15);
-            $table->decimal('paid_amount', 15)->default(0);
-            $table->decimal('change_amount', 15)->nullable();
-            $table->decimal('remaining_balance', 15)->default(0);
-            $table->enum('payment_status', ['unpaid', 'partial', 'paid',])->default('unpaid');
-            $table->date('due_date')->nullable();
+            $table->decimal('initial_payment', 15)->default(0); // bayar awal
+            $table->decimal('change_amount', 15)->nullable(); // uang kembalian jika cash
+            $table->decimal('remaining_balance', 15)->default(0); // uang yang masih belum dibayar
+            $table->enum('payment_status', ['unpaid', 'partial', 'paid',])->default('unpaid'); // partial == piutang
+            $table->date('due_date')->nullable(); // tanggal jatuh tempo jika piutang
             $table->enum('status', ['pending', 'completed', 'cancelled',])->default('pending');
-            $table->timestamp('paid_at')->nullable();
+            $table->timestamp('paid_at')->nullable(); // waktu jika pembayaran lunas
             $table->text('notes')->nullable();
             $table->timestamps();
 
             $table->index(['store_id', 'created_at',]);
             $table->index(['store_id', 'status',]);
-            $table->index('customer_id');
-            $table->index('user_id');
-            $table->index('due_date');
+            $table->index(['store_id', 'payment_status', 'due_date']);
             $table->index(['store_id', 'payment_method',]);
         });
     }

@@ -16,14 +16,12 @@ return new class extends Migration {
             $table->string('name', 150);
             $table->string('description', 255)->nullable();
             $table->decimal('discount_value', 15);
-            $table->decimal('minimum_purchase', 15)->default(0);
             $table->enum('customer_scope', ['all', 'guest', 'member'])->default('all');
             $table->dateTime('starts_date');
             $table->dateTime('ends_date');
             $table->boolean('is_active')->default(true);
             $table->timestamps();
 
-            $table->index('store_id');
             $table->index(['starts_date', 'ends_date']);
             $table->index(['store_id', 'is_active']);
         });

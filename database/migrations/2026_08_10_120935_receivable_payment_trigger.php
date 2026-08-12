@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Support\Facades\DB;
 
 return new class extends Migration {
     /**
@@ -8,65 +9,38 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        DB::unprepared("
-        CREATE TRIGGER trg_receivable_payments_after_insert
-        AFTER INSERT ON receivable_payments
-        FOR EACH ROW
-        BEGIN
-            DECLARE old_remaining_balance DECIMAL(15,2);
+        DB::unprepared('
+    CREATE TRIGGER trg_receivable_payments_after_insert
+    AFTER INSERT ON receivable_payments
+    FOR EACH ROW
+    BEGIN
+        DECLARE new_remaining DECIMAL(15, 2);
 
-            /*
-             * Simpan sisa piutang SEBELUM pembayaran ini.
-             */
-            SELECT remaining_balance
-            INTO old_remaining_balance
-            FROM sales
-            WHERE id = NEW.sale_id;
+        SELECT GREATEST(remaining_balance - NEW.amount, 0)
+        INTO new_remaining
+        FROM sales
+        WHERE id = NEW.sale_id;
 
-            UPDATE sales
-            SET
-                /*
-                 * Total yang sudah dibayar bertambah.
-                 */
-                paid_amount =
-                    paid_amount + NEW.amount,
+        UPDATE sales
+        SET
+            remaining_balance = new_remaining,
 
-                /*
-                 * Sisa piutang dihitung dari nilai SEBELUM trigger update.
-                 */
-                remaining_balance =
-                    GREATEST(
-                        old_remaining_balance - NEW.amount,
-                        0
-                    ),
+            payment_status = CASE
+                WHEN new_remaining = 0
+                    THEN "paid"
+                ELSE "partial"
+            END,
 
-                /*
-                 * Status juga menggunakan nilai lama,
-                 * sehingga NEW.amount tidak terhitung dua kali.
-                 */
-                payment_status =
-                    CASE
-                        WHEN old_remaining_balance - NEW.amount <= 0
-                            THEN 'paid'
-                        ELSE 'partial'
-                    END,
+            paid_at = CASE
+                WHEN new_remaining = 0
+                    THEN NEW.created_at
+                ELSE NULL
+            END,
 
-                /*
-                 * paid_at HANYA terisi saat cicilan ini
-                 * benar-benar melunasi piutang.
-                 */
-                paid_at =
-                    CASE
-                        WHEN old_remaining_balance - NEW.amount <= 0
-                            THEN NEW.paid_at
-                        ELSE NULL
-                    END,
-
-                updated_at = NOW()
-
-            WHERE id = NEW.sale_id;
-        END
-    ");
+            updated_at = NOW()
+        WHERE id = NEW.sale_id;
+    END
+    ');
     }
 
     /**
@@ -74,6 +48,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        DB::unprepared("DROP TRIGGER IF EXISTS trg_receivable_payments_after_insert");
+        DB::unprepared('DROP TRIGGER IF EXISTS trg_receivable_payments_after_insert');
     }
 };

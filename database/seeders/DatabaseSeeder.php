@@ -138,7 +138,6 @@ class DatabaseSeeder extends Seeder
             'name' => 'Diskon Hemat 5K',
             'description' => 'Potongan Rp5.000 per item.',
             'discount_value' => 5000,
-            'minimum_purchase' => 0,
             'customer_scope' => 'all',
             'starts_date' => now()->subDays(10),
             'ends_date' => now()->addDays(30),
@@ -150,7 +149,6 @@ class DatabaseSeeder extends Seeder
             'name' => 'Diskon Member 7K',
             'description' => 'Potongan Rp7.000 khusus member.',
             'discount_value' => 7000,
-            'minimum_purchase' => 0,
             'customer_scope' => 'member',
             'starts_date' => now()->subDays(5),
             'ends_date' => now()->addDays(20),
@@ -162,7 +160,6 @@ class DatabaseSeeder extends Seeder
             'name' => 'Promo 10K',
             'description' => 'Potongan Rp10.000 per item.',
             'discount_value' => 10000,
-            'minimum_purchase' => 0,
             'customer_scope' => 'all',
             'starts_date' => now()->subDay(),
             'ends_date' => now()->addDays(14),
@@ -170,93 +167,90 @@ class DatabaseSeeder extends Seeder
         ]);
 
         /*
-        |--------------------------------------------------------------------------
-        | PRODUCTS
-        |--------------------------------------------------------------------------
-        */
+|--------------------------------------------------------------------------
+| PRODUCTS
+|--------------------------------------------------------------------------
+*/
 
-        $productNames = [
-            'Air Mineral 600ml',
-            'Air Mineral 1.5L',
-            'Teh Botol Original',
-            'Teh Kotak Jasmine',
-            'Kopi Susu Botol',
-            'Kopi Bubuk Original',
-            'Susu UHT Cokelat',
-            'Susu UHT Vanilla',
-            'Jus Jeruk',
-            'Minuman Isotonik',
+        $productsData = [
+            // Minuman
+            ['Air Mineral 600ml', 0],
+            ['Air Mineral 1.5L', 0],
+            ['Teh Botol Original', 0],
+            ['Teh Kotak Jasmine', 0],
+            ['Kopi Susu Botol', 0],
+            ['Kopi Bubuk Original', 0],
+            ['Susu UHT Cokelat', 0],
+            ['Susu UHT Vanilla', 0],
+            ['Jus Jeruk', 0],
+            ['Minuman Isotonik', 0],
 
-            'Mie Instan Goreng',
-            'Mie Instan Ayam Bawang',
-            'Beras Premium 5kg',
-            'Gula Pasir 1kg',
-            'Minyak Goreng 1L',
-            'Tepung Terigu 1kg',
-            'Kecap Manis',
-            'Saus Sambal',
-            'Sarden Kaleng',
-            'Kornet Sapi',
+            // Makanan
+            ['Mie Instan Goreng', 1],
+            ['Mie Instan Ayam Bawang', 1],
+            ['Sarden Kaleng', 1],
+            ['Kornet Sapi', 1],
+            ['Roti Cokelat', 1],
+            ['Roti Keju', 1],
 
-            'Keripik Kentang',
-            'Keripik Singkong',
-            'Biskuit Cokelat',
-            'Wafer Vanilla',
-            'Kacang Panggang',
-            'Permen Mint',
-            'Cokelat Batang',
-            'Roti Cokelat',
-            'Roti Keju',
-            'Cookies Butter',
+            // Snack
+            ['Keripik Kentang', 2],
+            ['Keripik Singkong', 2],
+            ['Biskuit Cokelat', 2],
+            ['Wafer Vanilla', 2],
+            ['Kacang Panggang', 2],
+            ['Permen Mint', 2],
+            ['Cokelat Batang', 2],
+            ['Cookies Butter', 2],
 
-            'Sabun Mandi',
-            'Shampoo 170ml',
-            'Pasta Gigi',
-            'Sikat Gigi',
-            'Deterjen 800gr',
-            'Pewangi Pakaian',
-            'Tisu Wajah',
-            'Tisu Toilet',
-            'Pembersih Lantai',
-            'Sabun Cuci Piring',
+            // Sembako
+            ['Beras Premium 5kg', 3],
+            ['Gula Pasir 1kg', 3],
+            ['Minyak Goreng 1L', 3],
+            ['Tepung Terigu 1kg', 3],
+            ['Kecap Manis', 3],
+            ['Saus Sambal', 3],
 
-            'Kaos Polos Hitam M',
-            'Kaos Polos Putih L',
-            'Kemeja Casual',
-            'Celana Pendek',
-            'Kaos Kaki',
-            'Topi Casual',
+            // Kebutuhan Rumah
+            ['Deterjen 800gr', 4],
+            ['Pewangi Pakaian', 4],
+            ['Tisu Wajah', 4],
+            ['Tisu Toilet', 4],
+            ['Pembersih Lantai', 4],
+            ['Sabun Cuci Piring', 4],
 
-            'Kabel USB Type-C',
-            'Charger USB 20W',
-            'Earphone Kabel',
-            'Lampu LED 10W',
-            'Baterai AA',
-            'Stop Kontak 3 Lubang',
-            'Mouse Wireless',
-            'Keyboard USB',
+            // Perawatan Diri
+            ['Sabun Mandi', 5],
+            ['Shampoo 170ml', 5],
+            ['Pasta Gigi', 5],
+            ['Sikat Gigi', 5],
+
+            // Pakaian
+            ['Kaos Polos Hitam M', 6],
+            ['Kaos Polos Putih L', 6],
+            ['Kemeja Casual', 6],
+            ['Celana Pendek', 6],
+            ['Kaos Kaki', 6],
+            ['Topi Casual', 6],
+
+            // Elektronik
+            ['Kabel USB Type-C', 7],
+            ['Charger USB 20W', 7],
+            ['Earphone Kabel', 7],
+            ['Lampu LED 10W', 7],
+            ['Baterai AA', 7],
+            ['Stop Kontak 3 Lubang', 7],
+            ['Mouse Wireless', 7],
+            ['Keyboard USB', 7],
         ];
 
         $products = collect();
 
-        foreach ($productNames as $index => $name) {
-            $categoryIndex = match (true) {
-                $index < 10 => 0,
-                $index < 20 => 1,
-                $index < 30 => 2,
-                $index < 40 => 5,
-                $index < 46 => 6,
-                default => 7,
-            };
-
+        foreach ($productsData as $index => [$name, $categoryIndex]) {
             $costPrice = 3000 + (($index % 12) * 2500);
             $sellingNormal = $costPrice + 5000;
             $sellingGrocier = $sellingNormal - 2000;
 
-            /*
-             * Seed gambar berdasarkan kategori.
-             * Tujuannya hanya untuk testing mobile.
-             */
             $imageSeed = match ($categoryIndex) {
                 0 => 'drink',
                 1 => 'food',
@@ -284,10 +278,6 @@ class DatabaseSeeder extends Seeder
 
                     'name' => $name,
 
-                    /*
-                     * Gambar dummy online.
-                     * Tiap produk mendapat URL berbeda.
-                     */
                     'img_url' =>
                         "https://picsum.photos/seed/{$imageSeed}-{$index}/500/500",
 
