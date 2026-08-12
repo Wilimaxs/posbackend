@@ -15,6 +15,20 @@ class CustomerService
         return Customer::query()
             ->where('store_id', $storeId)
             ->where('is_active', true)
+            ->withCount([
+                'sales as receivable_transactions_count' => function ($query) {
+                    $query
+                        ->whereIn('payment_status', ['unpaid', 'partial'])
+                        ->where('remaining_balance', '>', 0);
+                }
+            ])
+            ->withSum([
+                'sales as receivable_total' => function ($query) {
+                    $query
+                        ->whereIn('payment_status', ['unpaid', 'partial'])
+                        ->where('remaining_balance', '>', 0);
+                }
+            ], 'remaining_balance')
             ->when($search, function ($query, $search) {
                 $query->where(function ($query) use ($search) {
                     $query
