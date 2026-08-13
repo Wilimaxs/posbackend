@@ -15,9 +15,9 @@ return new class extends Migration {
             $table->foreignId('store_id')->constrained('stores')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignId('user_id')->constrained('users')->cascadeOnUpdate()->restrictOnDelete();
             $table->foreignId('customer_id')->nullable()->constrained('customers')->cascadeOnUpdate()->nullOnDelete();
-            $table->string('invoice_number', 50)->unique();
+            $table->string('invoice_number', 50)->nullable()->unique(); // jika null maka status transaksi pending
             $table->enum('customer_type', ['guest', 'member',]);
-            $table->enum('payment_method', ['cash', 'qris',])->default('cash');
+            $table->enum('payment_method', ['cash', 'qris',])->nullable(); // jika null maka status transaksi pending
             $table->decimal('initial_payment', 15)->default(0); // bayar awal
             $table->decimal('change_amount', 15)->nullable(); // uang kembalian jika cash
             $table->decimal('remaining_balance', 15)->default(0); // uang yang masih belum dibayar
