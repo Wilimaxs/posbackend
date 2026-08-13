@@ -5,147 +5,90 @@ namespace App\Http\Resources\Api\V1\Payment;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * @property mixed $invoice_number
- * @property mixed $store
- * @property mixed $user
- * @property mixed $customer
- * @property mixed $customer_type
- * @property mixed $created_at
- * @property mixed $items
- * @property mixed $total_discount
- * @property mixed $total_after_discount
- * @property mixed $paid_amount
- * @property mixed $remaining_balance
- * @property mixed $payment_status
- * @property mixed $due_date
- * @property mixed $change_amount
- * @property mixed $payment_method
- * @property mixed $receivablePayments
- */
 class PaymentResource extends JsonResource
 {
-    public function toArray(Request $request): array
+    public function toArray(
+        Request $request
+    ): array
     {
-        $installmentPaidAmount =
-            (int)$this->receivablePayments->sum('amount');
+        $items = $this->items->map(function ($item) {
+            $subtotal = (int)$item->unit_price * (int)$item->quantity;
 
-        $initialPayment = max(
-            0,
-            (int)$this->paid_amount
-            - $installmentPaidAmount
-            - (int)($this->change_amount ?? 0)
+            $discount = (int)$item->discount_value;
+
+            return [
+                'product_name' => $item->product_name,
+
+                'quantity' => (int)$item->quantity,
+
+                'unit_price' => (int)$item->unit_price,
+
+                'discount' => $discount > 0 ? $discount : null,
+
+                'subtotal' => $subtotal,
+
+                'subtotal_after_discount' => $subtotal - $discount,
+            ];
+        }
         );
 
+        $totalBeforeDiscount = $items->sum('subtotal');
+
+        $totalDiscount = $items->sum(fn(array $item) => $item['discount'] ?? 0
+        );
 
         return [
-            'invoice_number' =>
-                $this->invoice_number,
+            'sale_id' => $this->id,
+
+            'invoice_number' => $this->invoice_number,
 
             'store' => [
-                'name' =>
-                    $this->store->name,
+                'name' => $this->store->name,
 
-                'address' =>
-                    $this->store->address,
+                'address' => $this->store->address,
 
-                'phone' =>
-                    $this->store->phone,
+                'phone' => $this->store->phone,
             ],
 
             'user' => [
-                'name' =>
-                    $this->user->name,
+                'name' => $this->user->name,
             ],
 
-            'customer' => $this->customer
-                ? [
-                    'name' =>
-                        $this->customer->name,
-                ]
-                : null,
+            'customer' =>
+                $this->customer
+                    ? [
+                    'name' => $this->customer->name,
+                ] : null,
 
-            'customer_type' =>
-                $this->customer_type,
+            'customer_type' => $this->customer_type,
 
-            'created_at' =>
-                $this->created_at?->toISOString(),
+            'created_at' => $this->created_at?->toISOString(),
 
-            'items' => $this->items->map(
-                function ($item) {
-                    return [
-                        'product_name' =>
-                            $item->product_name,
+            'items' => $items->values()->all(),
 
-                        'quantity' =>
-                            (int)$item->quantity,
+            'total_before_discount' => $totalBeforeDiscount,
 
-                        'unit_price' =>
-                            (int)$item->unit_price,
+            'total_discount' => $totalDiscount,
 
-                        'discount' =>
-                            (int)$item->discount_value > 0
-                                ? (int)$item->discount_value
-                                : null,
+            'total_after_discount' => $totalBeforeDiscount - $totalDiscount,
 
-                        'subtotal_after_discount' =>
-                            (int)$item->subtotal_after_discount,
-                    ];
-                }
-            )->values(),
+            'initial_payment' => (int)$this->initial_payment,
 
-            'initial_payment' =>
-                $initialPayment,
+            'change_amount' => (int)$this->change_amount,
 
-            'installment_paid_amount' =>
-                $installmentPaidAmount,
+            'remaining_balance' => (int)$this->remaining_balance,
 
-            'total_discount' =>
-                (int)$this->total_discount,
+            'payment_method' => $this->payment_method,
 
-            'total_after_discount' =>
-                (int)$this->total_after_discount,
+            'payment_status' => $this->payment_status,
 
-            'paid_amount' =>
-                (int)$this->paid_amount,
+            'due_date' => $this->due_date?->format('Y-m-d'),
 
-            'change_amount' =>
-                $this->change_amount !== null
-                    ? (int)$this->change_amount
-                    : null,
+            'paid_at' => $this->paid_at?->toISOString(),
 
-            'remaining_balance' =>
-                (int)$this->remaining_balance,
+            'status' => $this->status,
 
-            'payment_method' =>
-                $this->payment_method,
-
-            'payment_status' =>
-                $this->payment_status,
-
-            'due_date' =>
-                $this->due_date?->format('Y-m-d'),
-
-            'payment_history' =>
-                $this->receivablePayments
-                    ->map(function ($payment) {
-                        return [
-                            'amount' =>
-                                (int)$payment->amount,
-
-                            'paid_at' =>
-                                $payment->paid_at?->toISOString(),
-
-                            'user' => [
-                                'name' =>
-                                    $payment->user?->name,
-                            ],
-
-                            'notes' =>
-                                $payment->notes,
-                        ];
-                    })
-                    ->values(),
+            'notes' => $this->notes,
         ];
     }
 }

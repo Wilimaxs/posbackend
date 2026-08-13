@@ -2,258 +2,147 @@
 
 namespace App\Services\V1\Payment;
 
-use App\Models\Customer;
 use App\Models\Sale;
-use App\Models\SaleItem;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Throwable;
 
 class PaymentService
 {
-    public function __construct(
-        private readonly PaymentNormalizerService $normalizerService,
-        private readonly PaymentStockService      $stockService,
-        private readonly PaymentValidationService $validationService,
-    )
-    {
-    }
-
     /**
-     * @param int $storeId
-     * @param int $userId
-     * @param array $data
-     * @return Sale
      * @throws Throwable
      */
-    public function createPayment(
+    public function process(
         int   $storeId,
         int   $userId,
-        array $data
+        array $data,
     ): Sale
     {
-
         return DB::transaction(function () use (
             $storeId,
             $userId,
             $data
         ) {
-            // 1. Tentukan Guest / Member.
-            $customer = $this->validationService->getCustomer(
-                storeId: $storeId,
-                customerId: $data['customer_id'] ?? null,
+            // Lock sale untuk dibaca. sama dengan agar tidak bentrok dengan scheduler
+            $sale = Sale::query()
+                ->whereKey($data['sale_id'])
+                ->where('store_id', $storeId)
+                ->where('user_id', $userId)
+                ->lockForUpdate()
+                ->first();
+
+            if (!$sale) {
+                throw ValidationException::withMessages([
+                    'sale_id' => ['Transaksi tidak ditemukan.'],
+                ]);
+            }
+
+            // Idempotent retry. jika transaksi sudah selesai, tidak perlu diproses lagi.
+            if ($sale->status === 'completed') {
+                return $this->loadSale($sale);
+            }
+
+            // jika transaksi sudah tidak dapat dibayar, tidak perlu diproses lagi.
+            if ($sale->status !== 'pending') {
+                throw ValidationException::withMessages([
+                    'sale_id' => [
+                        'Transaksi sudah tidak dapat dibayar.',
+                    ],
+                ]);
+            }
+
+            // jika transaksi sudah kedaluwarsa, tidak perlu diproses lagi. ini untuk backup jika scheduler tidak berjalan.
+            if ($sale->created_at->lte(now()->subMinutes(5))) {
+                throw ValidationException::withMessages([
+                    'sale_id' => [
+                        'Transaksi sudah kedaluwarsa.',
+                    ],
+                ]);
+            }
+
+            $items = $sale->items()->get();
+
+            $total = $items->sum(fn($item) => (
+                    (int)$item->unit_price * (int)$item->quantity) - (int)$item->discount_value
             );
 
-            $isMember =
-                $customer !== null;
+            $paymentAmount = (int)$data['payment_amount'];
 
-            // 2. Handle duplicate product.
-            $items = $this->normalizerService->normalize(
-                items: $data['items'],
-            );
+            // jika customer adalah guest, maka harus melakukan pembayaran penuh.
+            if ($sale->customer_type === 'guest' && $paymentAmount < $total) {
+                throw ValidationException::withMessages([
+                    'payment_amount' => [
+                        'Guest harus melakukan pembayaran penuh.',
+                    ],
+                ]);
+            }
 
-            // 3. Lock stock database.
-            $stocks = $this->stockService->lockStocks(
-                storeId: $storeId,
-                items: $items,
-            );
+            $remainingBalance = max($total - $paymentAmount, 0);
 
-            // 4. Validasi stock dan tipe harga.
-            $this->validationService->validateItems(
-                stocks: $stocks,
-                items: $items,
-                isMember: $isMember,
-            );
+            // jika customer adalah member, maka harus mengisi due_date jika melakukan pembayaran sebagian.
+            if ($remainingBalance > 0 && empty($data['due_date'])) {
+                throw ValidationException::withMessages([
+                    'due_date' => [
+                        'Tanggal jatuh tempo wajib diisi untuk pembayaran sebagian.',
+                    ],
+                ]);
+            }
 
-            // 5. Validasi status pembayaran/piutang.
-            $this->validationService->validatePayment(
-                isMember: $isMember,
-                data: $data,
-            );
+            /*
+             * Nilai yang benar-benar masuk transaksi.
+             *
+             * bayar = 100.000
+             * total = 90.000
+             *
+             * initial_payment = 90.000
+             * change_amount   = 10.000
+             */
+            $initialPayment = min($paymentAmount, $total);
 
-            // 6. Simpan header transaksi.
-            $sale = $this->createSale(
-                storeId: $storeId,
-                userId: $userId,
-                customer: $customer,
-                data: $data,
-            );
+            $changeAmount = max($paymentAmount - $total, 0);
 
-            // 7. Simpan semua detail produk.
-            $this->createSaleItems(
-                sale: $sale,
-                items: $items,
-            );
+            $isPaid = $remainingBalance === 0;
 
-            // 8. Kurangi stock.
-            $this->stockService->decreaseStocks(
-                stocks: $stocks,
-                items: $items,
-            );
+            $sale->update([
+                'invoice_number' => $this->generateInvoiceNumber(),
 
-            // 9. Return transaksi lengkap.
-            return $sale->load([
-                'items',
-                'customer',
-                'user',
-                'store',
+                'payment_method' => $data['payment_method'],
+
+                'initial_payment' => $initialPayment,
+
+                'change_amount' => $changeAmount,
+
+                'remaining_balance' => $remainingBalance,
+
+                'payment_status' => $isPaid ? 'paid' : 'partial',
+
+                'due_date' => $isPaid ? null : $data['due_date'],
+
+                'status' => 'completed',
+
+                'paid_at' => $isPaid ? now() : null,
+
+                'notes' => $data['notes'] ?? null,
             ]);
+            return $this->loadSale($sale);
         }, 3);
     }
 
-    /**
-     * @param int $storeId
-     * @param int $userId
-     * @param Customer|null $customer
-     * @param array $data
-     * @return Sale
-     * @throws Throwable
-     */
-    private function createSale(
-        int       $storeId,
-        int       $userId,
-        ?Customer $customer,
-        array     $data
+    private function loadSale(
+        Sale $sale
     ): Sale
     {
-        $isMember =
-            $customer !== null;
-
-        $changeAmount = max(
-            0,
-            (int)$data['paid_amount'] - (int)$data['total_after_discount']
-        );
-
-        return Sale::create([
-            'store_id' =>
-                $storeId,
-
-            'user_id' =>
-                $userId,
-
-            'customer_id' =>
-                $customer?->id,
-
-            'invoice_number' =>
-                $this->generateInvoiceNumber(),
-
-            'customer_type' =>
-                $isMember
-                    ? 'member'
-                    : 'guest',
-
-            'total_before_discount' =>
-                $data['total_before_discount'],
-
-            'total_discount' =>
-                $data['total_discount'],
-
-            'total_after_discount' =>
-                $data['total_after_discount'],
-
-            'paid_amount' =>
-                $data['paid_amount'],
-
-            'change_amount' =>
-                $changeAmount,
-
-            'remaining_balance' =>
-                $data['remaining_balance'],
-
-            'payment_status' =>
-                $data['payment_status'],
-
-            'payment_method' =>
-                $data['payment_method'],
-
-            'due_date' =>
-                $data['due_date'] ?? null,
-
-            'status' =>
-                'completed',
-
-            'paid_at' =>
-                $data['payment_status'] === 'paid'
-                    ? now()
-                    : null,
-
-            'notes' =>
-                $data['notes'] ?? null,
+        return $sale->load([
+            'store',
+            'user',
+            'customer',
+            'items',
         ]);
     }
 
-    /**
-     * @param Sale $sale
-     * @param array $items
-     * @return void
-     * @throws Throwable
-     */
-    private function createSaleItems(
-        Sale  $sale,
-        array $items
-    ): void
-    {
-        foreach ($items as $item) {
-            SaleItem::create([
-                'sale_id' =>
-                    $sale->id,
-
-                'product_id' =>
-                    $item['product_id'],
-
-                'product_name' =>
-                    $item['product_name'],
-
-                'sku' =>
-                    $item['sku'],
-
-                'barcode' =>
-                    $item['barcode'] ?? null,
-
-                'unit' =>
-                    $item['unit'],
-
-                'quantity' =>
-                    $item['quantity'],
-
-                'cost_price' =>
-                    $item['cost_price'],
-
-                'unit_price' =>
-                    $item['unit_price'],
-
-                'price_type' =>
-                    $item['price_type'],
-
-                'subtotal' =>
-                    $item['subtotal'],
-
-                'discount_id' =>
-                    $item['discount']['id'] ?? null,
-
-                'discount_name' =>
-                    $item['discount']['name'] ?? null,
-
-                'discount_value' =>
-                    $item['discount']['value'] ?? 0,
-
-                'subtotal_after_discount' =>
-                    $item['subtotal_after_discount'],
-            ]);
-        }
-    }
-
-    /**
-     * @return string
-     * @throws Throwable
-     */
     private function generateInvoiceNumber(): string
     {
-        return 'INV-'
-            . now()->format('Ymd')
-            . '-'
-            . Str::upper(
-                (string)Str::ulid()
-            );
+        return 'INV-' . now()->format('Ymd') . '-' . Str::upper((string)Str::ulid());
     }
 }

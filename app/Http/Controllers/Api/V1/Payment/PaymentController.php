@@ -13,33 +13,25 @@ class PaymentController extends Controller
 {
     public function __construct(
         private readonly PaymentService $paymentService
-    )
-    {
+    ) {
     }
 
     public function store(
         PaymentRequest $request
-    ): JsonResponse
-    {
-        /*
-         * Sementara login belum dipakai.
-         *
-         * Nanti:
-         * storeId dan userId berasal dari user login.
-         */
+    ): JsonResponse {
+        // Sementara belum login.
         $storeId = 1;
         $userId = 1;
 
-        $sale = $this->paymentService->createPayment(
+        $sale = $this->paymentService->process(
             storeId: $storeId,
             userId: $userId,
             data: $request->validated(),
         );
 
         return ApiResponse::success(
-            data: PaymentResource::make($sale)->resolve($request),
+            data: new PaymentResource($sale),
             message: 'Pembayaran berhasil diproses.',
-            status: 201,
         );
     }
 }
