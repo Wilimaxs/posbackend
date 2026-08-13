@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\Payment\PaymentController;
 use App\Http\Controllers\Api\V1\Product\ProductController;
 use App\Http\Controllers\Api\V1\Receivable\ReceivableDetailController;
 use App\Http\Controllers\Api\V1\Receivable\ReceivableListController;
+use App\Http\Controllers\Api\V1\Receivable\ReceivablePaymentController;
 use App\Http\Controllers\Api\V1\Receivable\ReceivableSummaryController;
 use App\Http\Controllers\Api\V1\Transaction\TransactionController;
 use Illuminate\Support\Facades\Route;
@@ -23,5 +24,5 @@ Route::prefix('v1')->group(function () {
     Route::get('/receivables/summary', [ReceivableSummaryController::class, 'summary',]);
     Route::get('/receivables', [ReceivableListController::class, 'index',]);
     Route::get('/receivables/{saleId}', [ReceivableDetailController::class, 'show',]);
-//    Route::post('/receivables/{invoiceNumber}/payments', [ReceivablePaymentController::class, 'store',]);
+    Route::post('/receivables/{saleId}/payments', [ReceivablePaymentController::class, 'store']);
 });
