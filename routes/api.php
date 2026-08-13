@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\Checkout\CheckoutController;
 use App\Http\Controllers\Api\V1\Customer\CustomerController;
 use App\Http\Controllers\Api\V1\Payment\PaymentController;
 use App\Http\Controllers\Api\V1\Product\ProductController;
+use App\Http\Controllers\Api\V1\Receivable\ReceivableListController;
 use App\Http\Controllers\Api\V1\Receivable\ReceivableSummaryController;
 use App\Http\Controllers\Api\V1\Receivable\ReceivablePaymentController;
 use App\Http\Controllers\Api\V1\Transaction\TransactionController;
@@ -20,7 +21,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/transactions', [TransactionController::class, 'index',]);
     Route::get('/transactions/{invoiceNumber}', [TransactionController::class, 'show',]);
     Route::get('/receivables/summary', [ReceivableSummaryController::class, 'summary',]);
-    Route::get('/receivables', [ReceivableSummaryController::class, 'index',]);
-    Route::get('/receivables/{invoiceNumber}', [ReceivableSummaryController::class, 'show',]);
-    Route::post('/receivables/{invoiceNumber}/payments', [ReceivablePaymentController::class, 'store',]);
+    Route::get('/receivables', [ReceivableListController::class, 'index',]);
+//    Route::get('/receivables/{invoiceNumber}', [ReceivableSummaryController::class, 'show',]);
+//    Route::post('/receivables/{invoiceNumber}/payments', [ReceivablePaymentController::class, 'store',]);
 });

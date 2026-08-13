@@ -5,7 +5,7 @@ namespace App\Http\Requests\Api\V1\Receivable;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
-class ReceivableFilterRequest extends FormRequest
+class ReceivableListRequest extends FormRequest
 {
     public function authorize(): bool
     {
@@ -24,35 +24,18 @@ class ReceivableFilterRequest extends FormRequest
             'due_status' => [
                 'nullable',
                 Rule::in([
-                    'active',
-                    'due_today',
+                    'today',
                     'overdue',
+                    'active',
                 ]),
             ],
 
             'sort' => [
                 'nullable',
                 Rule::in([
-                    'newest',
-                    'oldest',
-                    'due_date_asc',
-                    'due_date_desc',
-                    'balance_asc',
-                    'balance_desc',
+                    'nearest',
+                    'farthest',
                 ]),
-            ],
-
-            'page' => [
-                'nullable',
-                'integer',
-                'min:1',
-            ],
-
-            'per_page' => [
-                'nullable',
-                'integer',
-                'min:1',
-                'max:100',
             ],
         ];
     }

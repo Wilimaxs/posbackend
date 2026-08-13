@@ -17,48 +17,9 @@ use Illuminate\Http\Request;
 class ReceivableController extends Controller
 {
     public function __construct(
-        private readonly ReceivableListService    $listService,
-        private readonly ReceivableDetailService  $detailService,
+        private readonly ReceivableDetailService $detailService,
     )
     {
-    }
-
-    public function index(
-        ReceivableFilterRequest $request
-    ): JsonResponse
-    {
-        $storeId = 1;
-
-        $receivables =
-            $this->listService->getReceivables(
-                storeId: $storeId,
-                filters: $request->validated(),
-            );
-
-        $data =
-            ReceivableResource::collection(
-                $receivables->getCollection()
-            )->resolve($request);
-
-        return ApiResponse::success(
-            data: $data,
-
-            message: 'Daftar piutang berhasil diambil.',
-
-            meta: [
-                'current_page' =>
-                    $receivables->currentPage(),
-
-                'last_page' =>
-                    $receivables->lastPage(),
-
-                'per_page' =>
-                    $receivables->perPage(),
-
-                'total' =>
-                    $receivables->total(),
-            ],
-        );
     }
 
     public function show(
