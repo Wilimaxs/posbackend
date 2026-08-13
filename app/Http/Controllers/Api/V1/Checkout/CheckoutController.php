@@ -13,23 +13,33 @@ class CheckoutController extends Controller
 {
     public function __construct(
         private readonly CheckoutService $checkoutService
-    ) {
+    )
+    {
     }
 
     public function preview(
         CheckoutRequest $request
-    ): JsonResponse {
+    ): JsonResponse
+    {
         $storeId = 1;
+        $userId = 1;
 
-        $preview = $this->checkoutService->preview(
+        $sale = $this->checkoutService->preview(
             storeId: $storeId,
-            customerId: $request->validated('customer_id'),
-            items: $request->validated('items'),
+            customerId: $request->validated(
+                'customer_id'
+            ),
+
+            items: $request->validated(
+                'items'
+            ),
+
+            userId: $userId,
         );
 
         return ApiResponse::success(
-            data: new CheckoutResource($preview),
-            message: 'Rincian pembayaran berhasil dihitung.',
+            data: new CheckoutResource($sale),
+            message: 'Rincian pembayaran berhasil disiapkan.',
         );
     }
 }

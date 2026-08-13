@@ -7,53 +7,66 @@ use Illuminate\Http\Resources\Json\JsonResource;
 
 class CheckoutResource extends JsonResource
 {
-    public function toArray(Request $request): array
+    public function toArray(
+        Request $request
+    ): array
     {
-        $customer = $this['customer'];
+        $items = $this->items
+            ->map(function ($item) {
+                $subtotal = (int)$item->unit_price * (int)$item->quantity;
+
+                $discountValue = (int)$item->discount_value;
+
+                return [
+                    'product_id' => $item->product_id,
+                    'name' => $item->product_name,
+
+                    'quantity' => (int)$item->quantity,
+                    'unit_price' => (int)$item->unit_price,
+
+                    'discount' => $item->discount_id
+                        ? [
+                            'id' => $item->discount_id,
+                            'name' => $item->discount_name,
+                            'value' => $discountValue,
+                        ] : null,
+
+                    'subtotal' => $subtotal,
+                    'subtotal_after_discount' => $subtotal - $discountValue,
+                ];
+            });
+
+        $totalBeforeDiscount = $items->sum('subtotal');
+
+        $totalDiscount = $items->sum(fn(array $item) => $item['discount']['value'] ?? 0);
 
         return [
-            'customer' => $customer
+            'sale_id' => $this->id,
+
+            'status' => $this->status,
+
+            'expires_at' => $this->created_at?->copy()->addMinutes(5)->toISOString(),
+
+            'customer' => $this->customer
                 ? [
-                    'id' => $customer->id,
-                    'customer_code' => $customer->customer_code,
-                    'name' => $customer->name,
-                    'phone' => $customer->phone,
-                ]
-                : null,
+                    'id' => $this->customer->id,
 
-            'customer_type' => $this['customer_type'],
+                    'customer_code' => $this->customer->customer_code,
 
-            'items' => collect($this['items'])
-                ->map(function (array $item) {
-                    $product = $item['product'];
+                    'name' => $this->customer->name,
 
-                    return [
-                        'product_id' => $product->id,
-                        'sku' => $product->sku,
-                        'barcode' => $product->barcode,
-                        'name' => $product->name,
+                    'phone' => $this->customer->phone,
+                ] : null,
 
-                        'quantity' => $item['quantity'],
-                        'unit_price' => $item['unit_price'],
+            'customer_type' => $this->customer_type,
 
-                        'discount' => $item['discount'],
+            'items' => $items->values()->all(),
 
-                        'subtotal' => $item['subtotal'],
-                        'subtotal_after_discount' =>
-                            $item['subtotal_after_discount'],
-                    ];
-                })
-                ->values()
-                ->all(),
+            'total_before_discount' => $totalBeforeDiscount,
 
-            'total_before_discount' =>
-                $this['total_before_discount'],
+            'total_discount' => $totalDiscount,
 
-            'total_discount' =>
-                $this['total_discount'],
-
-            'total_after_discount' =>
-                $this['total_after_discount'],
+            'total_after_discount' => $totalBeforeDiscount - $totalDiscount,
         ];
     }
 }

@@ -7,7 +7,7 @@ use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Validation\ValidationException;
 
-class preparationService
+class CheckoutPreparationService
 {
     public function getCustomer(
         int  $storeId,
@@ -30,7 +30,7 @@ class preparationService
         return $customer;
     }
 
-    public function prepareProducts(
+    public function getProducts(
         int    $storeId,
         array  $items,
         string $customerScope,

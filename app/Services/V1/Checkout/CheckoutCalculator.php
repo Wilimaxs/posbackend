@@ -10,20 +10,21 @@ use Illuminate\Validation\ValidationException;
 class CheckoutCalculator
 {
     public function calculate(
-        ?Customer $customer,
-        string $customerType,
-        string $priceColumn,
-        array $items,
+        ?Customer  $customer,
+        string     $customerType,
+        string     $priceType,
+        array      $items,
         Collection $products,
-    ): array {
+    ): array
+    {
         $resultItems = [];
 
         $totalBeforeDiscount = 0;
         $totalDiscount = 0;
 
         foreach ($items as $item) {
-            $productId = (int) $item['product_id'];
-            $quantity = (int) $item['quantity'];
+            $productId = (int)$item['product_id'];
+            $quantity = (int)$item['quantity'];
 
             $product = $products->get($productId);
 
@@ -46,13 +47,15 @@ class CheckoutCalculator
                 ]);
             }
 
-            $unitPrice = (int) $product->{$priceColumn};
+            $unitPrice = (int)$product->{
+            'selling_price_' . $priceType
+            };
 
             $discount = $stock->discount;
 
             $discountValue = $discount
                 ? min(
-                    (int) $discount->discount_value,
+                    (int)$discount->discount_value,
                     $unitPrice
                 )
                 : 0;
