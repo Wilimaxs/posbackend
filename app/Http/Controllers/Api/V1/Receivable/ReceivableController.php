@@ -17,31 +17,10 @@ use Illuminate\Http\Request;
 class ReceivableController extends Controller
 {
     public function __construct(
-        private readonly ReceivableSummaryService $summaryService,
         private readonly ReceivableListService    $listService,
         private readonly ReceivableDetailService  $detailService,
     )
     {
-    }
-
-    public function summary(
-        Request $request
-    ): JsonResponse
-    {
-        $storeId = 1;
-
-        $summary =
-            $this->summaryService->getSummary(
-                storeId: $storeId
-            );
-
-        return ApiResponse::success(
-            data: ReceivableSummaryResource::make(
-                $summary
-            )->resolve($request),
-
-            message: 'Ringkasan piutang berhasil diambil.',
-        );
     }
 
     public function index(
