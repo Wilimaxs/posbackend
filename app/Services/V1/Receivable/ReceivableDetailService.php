@@ -8,36 +8,27 @@ use Illuminate\Validation\ValidationException;
 class ReceivableDetailService
 {
     public function getDetail(
-        int    $storeId,
-        string $invoiceNumber
+        int $storeId,
+        int $saleId
     ): Sale
     {
         $sale = Sale::query()
-            ->with([
-                'customer',
-                'user',
-                'store',
+            ->with(['customer:id,customer_code,name,phone,address',
                 'items',
-                'receivablePayments' => function ($query) {
-                    $query
-                        ->with('user:id,name')
-                        ->orderBy('paid_at');
-                },
+                'receivablePayments' => fn($query) => $query
+                    ->with('user:id,name')
+                    ->orderBy('created_at'),
             ])
-            ->where(
-                'store_id',
-                $storeId
-            )
-            ->where(
-                'invoice_number',
-                $invoiceNumber
-            )
-            ->whereNotNull('due_date')
+            ->whereKey($saleId)
+            ->where('store_id', $storeId)
+            ->where('status', 'completed')
+            ->where('remaining_balance', '>', 0)
             ->first();
+
         if (!$sale) {
             throw ValidationException::withMessages([
-                'invoice_number' => [
-                    'Data piutang tidak ditemukan.',
+                'sale_id' => [
+                    'Piutang tidak ditemukan.',
                 ],
             ]);
         }

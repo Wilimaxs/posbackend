@@ -5,158 +5,79 @@ namespace App\Http\Resources\Api\V1\Receivable;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
-/**
- * @property mixed $invoice_number
- * @property mixed $customer
- * @property mixed $due_date
- * @property mixed $remaining_balance
- * @property mixed $total_after_discount
- * @property mixed $created_at
- * @property mixed $user
- * @property mixed $items
- * @property mixed $payment_method
- * @property mixed $total_discount
- * @property mixed $receivablePayments
- */
 class ReceivableDetailResource extends JsonResource
 {
     public function toArray(Request $request): array
     {
+        $items = $this->items->map(function ($item) {
+            $subtotal = (int)$item->unit_price * (int)$item->quantity;
 
-        $installmentTotal =
-            $this->getInstallmentTotal();
+            $discount = (int)$item->discount_value;
 
-        $initialPayment =
-            $this->getInitialPayment(
-                installmentTotal: $installmentTotal
-            );
+            return [
+                'product_id' => $item->product_id,
+                'name' => $item->product_name,
+                'quantity' => (int)$item->quantity,
+                'unit_price' => (int)$item->unit_price,
+                'discount' => $discount > 0 ? $discount : null,
+                'subtotal' => $subtotal,
+                'subtotal_after_discount' => $subtotal - $discount,
+            ];
+        });
+
+        $totalBeforeDiscount = $items->sum('subtotal');
+
+        $totalDiscount = $items->sum(fn(array $item) => $item['discount'] ?? 0);
+
+        $installmentTotal = (int)$this->receivablePayments->sum('amount');
 
         return [
-
-            'invoice_number' =>
-                $this->invoice_number,
-
+            'sale_id' => $this->id,
+            'invoice_number' => $this->invoice_number,
             'customer' => [
-                'name' =>
-                    $this->customer?->name,
-
-                'phone' =>
-                    $this->customer?->phone,
-
-                'address' =>
-                    $this->customer?->address,
+                'id' => $this->customer->id,
+                'customer_code' => $this->customer->customer_code,
+                'name' => $this->customer->name,
+                'phone' => $this->customer->phone,
+                'address' => $this->customer->address,
             ],
 
-            'due_date' =>
-                $this->due_date?->format('Y-m-d'),
+            'items' => $items->values()->all(),
 
-            'due_status' =>
-                $this->resolveDueStatus(),
+            'total_before_discount' => $totalBeforeDiscount,
 
-            'total_after_discount' => (int)$this->total_after_discount,
+            'total_discount' => $totalDiscount,
 
-            'initial_payment' => $initialPayment,
+            'total_after_discount' => $totalBeforeDiscount - $totalDiscount,
 
-            'paid_amount' => $installmentTotal,
+            'initial_payment' => (int)$this->initial_payment, // uang DP
 
-            'remaining_balance' => (int)$this->remaining_balance,
+            'installment_total' => $installmentTotal, // total uang cicilan saja
 
+            'total_paid' => (int)$this->initial_payment + $installmentTotal, // total uang DP + cicilan
 
-            'original_transaction' => [
+            'remaining_balance' => (int)$this->remaining_balance, // sisa utang sekarang
 
-                'created_at' => $this->created_at?->toISOString(),
+            'due_date' => $this->due_date?->format('Y-m-d'), // tanggal jatuh tempo
 
-                'user' => [
-                    'name' => $this->user?->name,
-                ],
+            'receivable_payments' => $this->receivablePayments
+                ->map(fn($payment) => [
+                    'id' => $payment->id,
+                    'amount' => (int)$payment->amount,
+                    'user' => [
+                        'id' => $payment->user->id,
+                        'name' => $payment->user->name,
+                    ],
 
-                'item_count' =>
-                    (int)$this->items->sum('quantity'),
+                    'notes' => $payment->notes,
 
-                'payment_method' => $this->payment_method,
+                    'created_at' => $payment->created_at?->toISOString(),
+                ])
+                ->values()
+                ->all(),
 
-                'items' =>
-                    $this->items
-                        ->map(function ($item) {
-                            return [
-                                'product_name' =>
-                                    $item->product_name,
-
-                                'quantity' =>
-                                    (int)$item->quantity,
-
-                                'unit_price' =>
-                                    (int)$item->unit_price,
-
-                                'discount' =>
-                                    (int)$item->discount_value > 0
-                                        ? (int)$item->discount_value
-                                        : null,
-
-                                'subtotal_after_discount' =>
-                                    (int)$item->subtotal_after_discount,
-                            ];
-                        })
-                        ->values(),
-
-                'total_discount' =>
-                    (int)$this->total_discount,
-
-                'total_after_discount' =>
-                    (int)$this->total_after_discount,
-            ],
-
-            'payment_history' =>
-                $this->receivablePayments
-                    ->map(function ($payment) {
-                        return [
-                            'amount' =>
-                                (int)$payment->amount,
-
-                            'paid_at' =>
-                                $payment->paid_at
-                                    ?->toISOString(),
-
-                            'user' => [
-                                'name' =>
-                                    $payment->user?->name,
-                            ],
-
-                            'notes' =>
-                                $payment->notes,
-                        ];
-                    })
-                    ->values(),
+            'created_at' =>
+                $this->created_at?->toISOString(),
         ];
-    }
-
-    private function getInstallmentTotal(): int
-    {
-        return (int)$this->receivablePayments
-            ->sum('amount');
-    }
-
-    private function getInitialPayment(
-        int $installmentTotal
-    ): int
-    {
-        return max(
-            0,
-            (int)$this->resource->paid_amount
-            - $installmentTotal
-        );
-    }
-
-    private function resolveDueStatus(): string
-    {
-        if ($this->due_date->isToday()) {
-            return 'due_today';
-        }
-
-        if ($this->due_date->isPast()) {
-            return 'overdue';
-        }
-
-        return 'active';
     }
 }
