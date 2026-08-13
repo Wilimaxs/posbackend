@@ -52,6 +52,28 @@ class DatabaseSeeder extends Seeder
             'is_active' => true,
         ]);
 
+        User::create([
+            'store_id' => $storeBandung->id,
+            'name' => 'Kasir Satu',
+            'username' => 'kasir1',
+            'email' => 'kasir1@pos.test',
+            'phone' => '081111111111',
+            'password' => 'password',
+            'role' => 'cashier',
+            'is_active' => true,
+        ]);
+
+        User::create([
+            'store_id' => $storeBandung->id,
+            'name' => 'Kasir Dua',
+            'username' => 'kasir2',
+            'email' => 'kasir2@pos.test',
+            'phone' => '082222222222',
+            'password' => 'password',
+            'role' => 'cashier',
+            'is_active' => true,
+        ]);
+
         /*
         |--------------------------------------------------------------------------
         | CATEGORIES
