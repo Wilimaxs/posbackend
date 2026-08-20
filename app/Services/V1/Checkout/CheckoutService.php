@@ -63,7 +63,7 @@ class CheckoutService
                     customerId: $customerId,
                 );
                 $customerScope = 'member';
-                $priceType = 'normal';
+                $priceType = 'grocier';
             }
 
             $products = $this->dataService->getProducts(
