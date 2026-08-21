@@ -21,7 +21,15 @@ class SaleCancellationService
                     ->lockForUpdate()
                     ->first();
 
-                if (!$sale || $sale->status !== 'pending') {
+                if (!$sale) {
+                    return false;
+                }
+
+                if ($sale->status === 'cancelled') {
+                    return true;
+                }
+
+                if ($sale->status !== 'pending') {
                     return false;
                 }
 

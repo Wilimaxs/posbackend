@@ -54,7 +54,6 @@ class ReceivableListService
                 )
             )
             ->orderByDesc('id')
-            ->orderByDesc('id')
             ->paginate(20);
     }
 }
