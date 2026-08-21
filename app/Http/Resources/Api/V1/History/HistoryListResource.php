@@ -20,6 +20,8 @@ class HistoryListResource extends JsonResource
             'customer_type' => $this->customer_type,
             'total_after_discount' => (int)$this->total_after_discount,
             'payment_status' => $this->payment_status,
+            'payment_method' => $this->payment_method,
+            'remaining_balance' => $this->payment_status === 'partial' ? (int)$this->remaining_balance : null,
         ];
     }
 }
