@@ -5,7 +5,6 @@ namespace App\Services\V1\Checkout;
 use App\Models\Customer;
 use App\Models\Product;
 use Illuminate\Database\Eloquent\Collection;
-use Illuminate\Validation\ValidationException;
 
 class CheckoutCalculator
 {
@@ -28,24 +27,9 @@ class CheckoutCalculator
 
             $product = $products->get($productId);
 
-            if (!$product) {
-                throw ValidationException::withMessages([
-                    'items' => [
-                        "Produk ID $productId tidak tersedia pada toko ini.",
-                    ],
-                ]);
-            }
             /** @var Product|null $product */
             $stock = $product->productStocks->first();
 
-            if ($stock->stock < $quantity) {
-                throw ValidationException::withMessages([
-                    'items' => [
-                        "Stok $product->name tidak mencukupi. "
-                        . "Stok tersedia: $stock->stock.",
-                    ],
-                ]);
-            }
 
             $unitPrice = (int)$product->{
             'selling_price_' . $priceType

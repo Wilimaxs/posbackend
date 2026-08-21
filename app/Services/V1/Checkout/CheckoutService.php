@@ -6,6 +6,7 @@ use App\Models\ProductStock;
 use App\Models\Sale;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\ValidationException;
 
 class CheckoutService
 {
@@ -84,6 +85,31 @@ class CheckoutService
                 ->lockForUpdate()
                 ->get()
                 ->keyBy('product_id');
+
+            foreach ($items as $item) {
+                $productId = (int) $item['product_id'];
+                $quantity = (int) $item['quantity'];
+
+                $product = $products->get($productId);
+                $stock = $stocks->get($productId);
+
+                if (!$product || !$stock) {
+                    throw ValidationException::withMessages([
+                        'items' => [
+                            "Produk ID {$productId} tidak tersedia pada toko ini.",
+                        ],
+                    ]);
+                }
+
+                if ((int) $stock->stock < $quantity) {
+                    throw ValidationException::withMessages([
+                        'items' => [
+                            "Stok {$product->name} tidak mencukupi. "
+                            . "Stok tersedia: {$stock->stock}.",
+                        ],
+                    ]);
+                }
+            }
 
             $calculated = $this->calculator->calculate(
                 customer: $customer,

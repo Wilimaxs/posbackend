@@ -19,7 +19,7 @@ class ProductResource extends JsonResource
             'barcode' => $this->barcode,
             'name' => $this->name,
             // Todo = wajib diganti dengan yang asli
-            'image_url' => $this->image_url,
+            'image_url' => $this->img_url,
 
             'category' => $this->category
                 ? [
