@@ -26,7 +26,7 @@ Route::prefix('v1')->group(function () {
     Route::get('/history/{invoiceNumber}', [HistoryDetailController::class, 'show']);
     Route::get('/receivables/summary', [ReceivableSummaryController::class, 'summary',]);
     Route::get('/receivables', [ReceivableListController::class, 'index',]);
-    Route::get('/receivables/{saleId}', [ReceivableDetailController::class, 'show',]);
-    Route::post('/receivables/{saleId}/payments', [ReceivablePaymentController::class, 'store']);
-    Route::post('/checkout/preview/{saleId}/cancel', [PaymentCancelController::class,'cancel'])->whereNumber('saleId');
+    Route::get('/receivables/{saleId}', [ReceivableDetailController::class, 'show',])->whereNumber('saleId');;
+    Route::post('/receivables/{saleId}/payments', [ReceivablePaymentController::class, 'store'])->whereNumber('saleId');;
+    Route::post('/checkout/preview/{saleId}/cancel', [PaymentCancelController::class, 'cancel'])->whereNumber('saleId');
 });
