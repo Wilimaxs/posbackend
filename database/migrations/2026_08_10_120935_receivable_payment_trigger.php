@@ -25,12 +25,6 @@ return new class extends Migration {
         SET
             remaining_balance = new_remaining,
 
-            payment_status = CASE
-                WHEN new_remaining = 0
-                    THEN "paid"
-                ELSE "partial"
-            END,
-
             paid_at = CASE
                 WHEN new_remaining = 0
                     THEN NEW.created_at
