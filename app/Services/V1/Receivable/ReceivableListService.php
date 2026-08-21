@@ -42,11 +42,18 @@ class ReceivableListService
                 ->whereDate('due_date', '>', today())
             )
             ->when($sort === 'nearest', fn($query) => $query
-                ->orderBy('due_date')
+                ->orderByRaw(
+                    'ABS(DATEDIFF(due_date, ?)) ASC',
+                    [today()->toDateString()]
+                )
             )
             ->when($sort === 'farthest', fn($query) => $query
-                ->orderByDesc('due_date')
+                ->orderByRaw(
+                    'ABS(DATEDIFF(due_date, ?)) DESC',
+                    [today()->toDateString()]
+                )
             )
+            ->orderByDesc('id')
             ->orderByDesc('id')
             ->paginate(20);
     }
