@@ -17,7 +17,7 @@ class PaymentCancelController extends Controller
         int $saleId
     ): JsonResponse {
 
-        $cancelled = $this->cancellationService->cancelExpired(
+        $cancelled = $this->cancellationService->cancel(
             saleId: $saleId,
         );
 

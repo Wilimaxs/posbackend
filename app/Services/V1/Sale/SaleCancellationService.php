@@ -9,7 +9,7 @@ use RuntimeException;
 
 class SaleCancellationService
 {
-    public function cancelExpired(
+    public function cancel(
         int $saleId
     ): bool
     {
@@ -21,14 +21,7 @@ class SaleCancellationService
                     ->lockForUpdate()
                     ->first();
 
-                /*
-                 * Jangan restore stok kalau:
-                 * - sale hilang
-                 * - bukan pending
-                 * - belum 5 menit
-                 */
-                if (!$sale || $sale->status !== 'pending' || $sale->created_at->gt(now()->subMinutes(5))
-                ) {
+                if (!$sale || $sale->status !== 'pending') {
                     return false;
                 }
 

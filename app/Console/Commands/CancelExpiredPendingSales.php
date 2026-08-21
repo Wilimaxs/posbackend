@@ -22,7 +22,7 @@ class CancelExpiredPendingSales extends Command
             ->orderBy('id')
             ->chunkById(100, function ($sales) use ($cancellationService) {
                 foreach ($sales as $sale) {
-                    $cancellationService->cancelExpired($sale->id);
+                    $cancellationService->cancel($sale->id);
                 }
             });
         return self::SUCCESS;
