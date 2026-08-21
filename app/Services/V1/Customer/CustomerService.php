@@ -18,6 +18,7 @@ class CustomerService
             ->withCount([
                 'sales as receivable_transactions_count' => function ($query) {
                     $query
+                        ->where('status', 'completed')
                         ->whereIn('payment_status', ['unpaid', 'partial'])
                         ->where('remaining_balance', '>', 0);
                 }
@@ -25,6 +26,7 @@ class CustomerService
             ->withSum([
                 'sales as receivable_total' => function ($query) {
                     $query
+                        ->where('status', 'completed')
                         ->whereIn('payment_status', ['unpaid', 'partial'])
                         ->where('remaining_balance', '>', 0);
                 }

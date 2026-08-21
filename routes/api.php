@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\V1\Checkout\CheckoutController;
 use App\Http\Controllers\Api\V1\Customer\CustomerController;
 use App\Http\Controllers\Api\V1\History\HistoryListController;
 use App\Http\Controllers\Api\V1\History\HistorySummaryController;
+use App\Http\Controllers\Api\V1\Payment\PaymentCancelController;
 use App\Http\Controllers\Api\V1\Payment\PaymentController;
 use App\Http\Controllers\Api\V1\Product\ProductController;
 use App\Http\Controllers\Api\V1\Receivable\ReceivableDetailController;
@@ -27,4 +28,5 @@ Route::prefix('v1')->group(function () {
     Route::get('/receivables', [ReceivableListController::class, 'index',]);
     Route::get('/receivables/{saleId}', [ReceivableDetailController::class, 'show',]);
     Route::post('/receivables/{saleId}/payments', [ReceivablePaymentController::class, 'store']);
+    Route::post('/checkout/preview/{saleId}/cancel', [PaymentCancelController::class,'cancel'])->whereNumber('saleId');
 });
