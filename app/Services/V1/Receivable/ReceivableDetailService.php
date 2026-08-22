@@ -14,6 +14,7 @@ class ReceivableDetailService
     {
         $sale = Sale::query()
             ->with(['customer:id,customer_code,name,phone,address',
+                'user:id,name',
                 'items',
                 'receivablePayments' => fn($query) => $query
                     ->with('user:id,name')

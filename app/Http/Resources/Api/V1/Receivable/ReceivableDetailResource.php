@@ -50,6 +50,14 @@ class ReceivableDetailResource extends JsonResource
 
             'total_after_discount' => $totalBeforeDiscount - $totalDiscount,
 
+            'due_status' => $this->getDueStatus(),
+
+            'cashier' => [
+                'name' => $this->user->name,
+            ],
+
+            'payment_method' => $this->payment_method,
+
             'initial_payment' => (int)$this->initial_payment, // uang DP
 
             'installment_total' => $installmentTotal, // total uang cicilan saja
@@ -79,5 +87,18 @@ class ReceivableDetailResource extends JsonResource
             'created_at' =>
                 $this->created_at?->toISOString(),
         ];
+    }
+
+    private function getDueStatus(): string
+    {
+        if ($this->due_date->isToday()) {
+            return 'today';
+        }
+
+        if ($this->due_date->isPast()) {
+            return 'overdue';
+        }
+
+        return 'active';
     }
 }
