@@ -11,6 +11,7 @@ class ProductService
         int     $storeId,
         ?string $search = null,
         ?int    $categoryId = null,
+        bool    $includeInactive = false,
     ): LengthAwarePaginator
     {
         return Product::query()
@@ -27,7 +28,10 @@ class ProductService
                         });
                 },
             ])
-            ->where('is_active', true)
+            ->when(
+                !$includeInactive,
+                fn($query) => $query->where('is_active', true)
+            )
             ->whereHas('productStocks', function ($query) use ($storeId) {
                 $query->where('store_id', $storeId);
             })

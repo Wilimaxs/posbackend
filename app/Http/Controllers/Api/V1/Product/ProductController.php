@@ -25,6 +25,7 @@ class ProductController extends Controller
             storeId: $storeId,
             search: $request->string('search')->toString() ?: null,
             categoryId: $request->integer('category_id') ?: null,
+            includeInactive: $request->boolean('include_inactive'),
         );
 
         return ApiResponse::success(

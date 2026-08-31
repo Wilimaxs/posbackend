@@ -18,8 +18,11 @@ class ProductResource extends JsonResource
             'sku' => $this->sku,
             'barcode' => $this->barcode,
             'name' => $this->name,
+
             // Todo = wajib diganti dengan yang asli
             'image_url' => $this->img_url,
+
+            'description' => $this->description,
 
             'category' => $this->category
                 ? [
@@ -28,12 +31,16 @@ class ProductResource extends JsonResource
                 ]
                 : null,
 
+            'cost_price' => (int) $this->cost_price,
+
             'price' => [
-                'normal' => (int)$this->selling_price_normal,
+                'normal' => (int) $this->selling_price_normal,
                 'grocier' => $this->selling_price_grocier !== null
-                    ? (int)$this->selling_price_grocier
+                    ? (int) $this->selling_price_grocier
                     : null,
             ],
+
+            'unit' => $this->unit,
 
             'stock' => $stock?->stock ?? 0,
             'minimum_stock' => $stock?->minimum_stock ?? 0,
@@ -42,12 +49,12 @@ class ProductResource extends JsonResource
                 ? [
                     'id' => $discount->id,
                     'name' => $discount->name,
-                    'value' => (int)$discount->discount_value,
+                    'value' => (int) $discount->discount_value,
                     'customer_scope' => $discount->customer_scope,
                 ]
                 : null,
 
-            'is_active' => true,
+            'is_active' => $this->is_active,
         ];
     }
 }
