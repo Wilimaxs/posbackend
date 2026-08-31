@@ -26,7 +26,7 @@ return new class extends Migration
                 ->cascadeOnUpdate()
                 ->restrictOnDelete();
 
-            $table->string('purchase_number', 50);
+            $table->string('purchase_number', 50)->unique();;
 
             $table->string('vendor_reference', 100);
 
