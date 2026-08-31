@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\V1\Receivable\ReceivableListController;
 use App\Http\Controllers\Api\V1\Receivable\ReceivablePaymentController;
 use App\Http\Controllers\Api\V1\Receivable\ReceivableSummaryController;
 use App\Http\Controllers\Api\V1\History\HistoryDetailController;
+use App\Http\Controllers\Api\V1\Vendor\VendorListController;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
@@ -29,4 +30,5 @@ Route::prefix('v1')->group(function () {
     Route::get('/receivables/{saleId}', [ReceivableDetailController::class, 'show',])->whereNumber('saleId');
     Route::post('/receivables/{saleId}/payments', [ReceivablePaymentController::class, 'store'])->whereNumber('saleId');
     Route::post('/checkout/preview/{saleId}/cancel', [PaymentCancelController::class, 'cancel'])->whereNumber('saleId');
+    Route::get('/vendors', [VendorListController::class, 'index']);
 });

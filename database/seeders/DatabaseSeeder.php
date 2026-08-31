@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\ProductStock;
 use App\Models\Store;
 use App\Models\User;
+use App\Models\Vendor;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -73,6 +74,95 @@ class DatabaseSeeder extends Seeder
             'role' => 'cashier',
             'is_active' => true,
         ]);
+
+        /*
+|--------------------------------------------------------------------------
+| VENDORS
+|--------------------------------------------------------------------------
+*/
+
+        $vendorsBandung = [
+            [
+                'name' => 'PT Sumber Makmur',
+                'phone' => '081300000001',
+                'email' => 'sales@sumbermakmur.test',
+                'address' => 'Bandung, Jawa Barat',
+                'contact_name' => 'Budi Santoso',
+                'contact_phone' => '082100000001',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'CV Berkah Jaya',
+                'phone' => '081300000002',
+                'email' => 'berkahjaya@test.com',
+                'address' => 'Cimahi, Jawa Barat',
+                'contact_name' => 'Rudi Hartono',
+                'contact_phone' => '082100000002',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'PT Nusantara Sejahtera',
+                'phone' => '081300000003',
+                'email' => 'sales@nusantarasejahtera.test',
+                'address' => 'Bandung, Jawa Barat',
+                'contact_name' => 'Andi Wijaya',
+                'contact_phone' => '082100000003',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'CV Mitra Pangan',
+                'phone' => '081300000004',
+                'email' => 'mitrapangan@test.com',
+                'address' => 'Kabupaten Bandung, Jawa Barat',
+                'contact_name' => 'Siti Rahma',
+                'contact_phone' => '082100000004',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'PT Sentosa Distribusi',
+                'phone' => '081300000005',
+                'email' => null,
+                'address' => 'Bandung, Jawa Barat',
+                'contact_name' => 'Dedi Kurniawan',
+                'contact_phone' => '082100000005',
+                'is_active' => false,
+            ],
+        ];
+
+        foreach ($vendorsBandung as $vendor) {
+            Vendor::create([
+                'store_id' => $storeBandung->id,
+                ...$vendor,
+            ]);
+        }
+
+        $vendorsGarut = [
+            [
+                'name' => 'CV Garut Makmur',
+                'phone' => '081400000001',
+                'email' => 'garutmakmur@test.com',
+                'address' => 'Garut, Jawa Barat',
+                'contact_name' => 'Agus Setiawan',
+                'contact_phone' => '083100000001',
+                'is_active' => true,
+            ],
+            [
+                'name' => 'PT Priangan Distribusi',
+                'phone' => '081400000002',
+                'email' => null,
+                'address' => 'Garut, Jawa Barat',
+                'contact_name' => 'Yudi Permana',
+                'contact_phone' => '083100000002',
+                'is_active' => true,
+            ],
+        ];
+
+        foreach ($vendorsGarut as $vendor) {
+            Vendor::create([
+                'store_id' => $storeGarut->id,
+                ...$vendor,
+            ]);
+        }
 
         /*
         |--------------------------------------------------------------------------
