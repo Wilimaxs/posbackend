@@ -390,8 +390,7 @@ class DatabaseSeeder extends Seeder
 
                     'name' => $name,
 
-                    'img_url' =>
-                        "https://picsum.photos/seed/{$imageSeed}-{$index}/500/500",
+                    'img_url' => 'products/dummy_photo.png',
 
                     'description' => "Produk dummy {$name}.",
 
