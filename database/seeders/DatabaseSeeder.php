@@ -363,18 +363,6 @@ class DatabaseSeeder extends Seeder
             $sellingNormal = $costPrice + 5000;
             $sellingGrocier = $sellingNormal - 2000;
 
-            $imageSeed = match ($categoryIndex) {
-                0 => 'drink',
-                1 => 'food',
-                2 => 'snack',
-                3 => 'groceries',
-                4 => 'household',
-                5 => 'personal-care',
-                6 => 'clothing',
-                7 => 'electronics',
-                default => 'product',
-            };
-
             $products->push(
                 Product::create([
                     'category_id' => $categories[$categoryIndex]->id,

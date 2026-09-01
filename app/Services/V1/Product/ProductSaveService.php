@@ -13,8 +13,8 @@ use Throwable;
 class ProductSaveService
 {
     public function save(
-        int $storeId,
-        array $data,
+        int           $storeId,
+        array         $data,
         ?UploadedFile $image = null,
     ): void
     {
@@ -162,28 +162,39 @@ class ProductSaveService
             ]);
         }
 
-        DB::transaction(function () use (
-            $storeId,
-            $data,
-            $minimumStock,
-            $image
-        ) {
-            if ($image) {
-                $data['img_url'] = $image->store(
-                    'products',
-                    'public'
-                );
+        $newImage = null;
+
+        if ($image) {
+            $newImage = $image->store(
+                'products',
+                'public'
+            );
+
+            $data['img_url'] = $newImage;
+        }
+
+        try {
+            DB::transaction(function () use (
+                $storeId,
+                $data,
+                $minimumStock
+            ) {
+                $product = Product::create($data);
+
+                ProductStock::create([
+                    'store_id' => $storeId,
+                    'product_id' => $product->id,
+                    'discount_id' => null,
+                    'stock' => 0,
+                    'minimum_stock' => $minimumStock,
+                ]);
+            });
+        } catch (Throwable $e) {
+            if ($newImage) {
+                Storage::disk('public')->delete($newImage);
             }
 
-            $product = Product::create($data);
-
-            ProductStock::create([
-                'store_id' => $storeId,
-                'product_id' => $product->id,
-                'discount_id' => null,
-                'stock' => 0,
-                'minimum_stock' => $minimumStock,
-            ]);
-        });
+            throw $e;
+        }
     }
 }
