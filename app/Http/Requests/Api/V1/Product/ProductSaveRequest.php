@@ -43,10 +43,11 @@ class ProductSaveRequest extends FormRequest
                 'max:150',
             ],
 
-            'img_url' => [
+            'image' => [
                 'nullable',
-                'string',
-                'max:255',
+                'image',
+                'mimes:jpg,jpeg,png,webp',
+                'max:2048',
             ],
 
             'description' => [

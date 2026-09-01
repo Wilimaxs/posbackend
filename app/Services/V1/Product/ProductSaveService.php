@@ -6,12 +6,16 @@ use App\Models\Product;
 use App\Models\ProductStock;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Storage;
+use Throwable;
 
 class ProductSaveService
 {
     public function save(
-        int   $storeId,
-        array $data
+        int $storeId,
+        array $data,
+        ?UploadedFile $image = null,
     ): void
     {
         $productId = $data['id'] ?? null;
@@ -43,6 +47,8 @@ class ProductSaveService
             $data['id'],
             $data['minimum_stock']
         );
+
+        unset($data['image']);
 
         /*
          * UPDATE
@@ -94,18 +100,41 @@ class ProductSaveService
                 }
             }
 
-            DB::transaction(function () use (
-                $product,
-                $productStock,
-                $data,
-                $minimumStock
-            ) {
-                $product->update($data);
+            $oldImage = $product->img_url;
+            $newImage = null;
 
-                $productStock->update([
-                    'minimum_stock' => $minimumStock,
-                ]);
-            });
+            if ($image) {
+                $newImage = $image->store(
+                    'products',
+                    'public'
+                );
+
+                $data['img_url'] = $newImage;
+            }
+
+            try {
+                DB::transaction(function () use (
+                    $product,
+                    $productStock,
+                    $data,
+                    $minimumStock
+                ) {
+                    $product->update($data);
+
+                    $productStock->update([
+                        'minimum_stock' => $minimumStock,
+                    ]);
+                });
+                if ($newImage && $oldImage && $oldImage !== $newImage) {
+                    Storage::disk('public')->delete($oldImage);
+                }
+            } catch (Throwable $e) {
+                if ($newImage) {
+                    Storage::disk('public')->delete($newImage);
+                }
+
+                throw $e;
+            }
 
             return;
         }
@@ -136,8 +165,16 @@ class ProductSaveService
         DB::transaction(function () use (
             $storeId,
             $data,
-            $minimumStock
+            $minimumStock,
+            $image
         ) {
+            if ($image) {
+                $data['img_url'] = $image->store(
+                    'products',
+                    'public'
+                );
+            }
+
             $product = Product::create($data);
 
             ProductStock::create([

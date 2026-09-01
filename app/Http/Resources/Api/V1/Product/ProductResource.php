@@ -19,8 +19,7 @@ class ProductResource extends JsonResource
             'barcode' => $this->barcode,
             'name' => $this->name,
 
-            // Todo = wajib diganti dengan yang asli
-            'image_url' => $this->img_url,
+            'image_url' => $this->img_url ? asset('storage/'.$this->img_url) : null,
 
             'description' => $this->description,
 

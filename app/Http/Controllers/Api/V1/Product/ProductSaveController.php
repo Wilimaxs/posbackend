@@ -23,10 +23,10 @@ class ProductSaveController extends Controller
         $this->saveService->save(
             storeId: $storeId,
             data: $request->validated(),
+            image: $request->file('image'),
         );
 
         return ApiResponse::success(
-            data: null,
             message: 'Produk berhasil disimpan.',
         );
     }
