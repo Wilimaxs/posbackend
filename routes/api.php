@@ -9,6 +9,7 @@ use App\Http\Controllers\Api\V1\Payment\PaymentCancelController;
 use App\Http\Controllers\Api\V1\Payment\PaymentController;
 use App\Http\Controllers\Api\V1\Product\ProductController;
 use App\Http\Controllers\Api\V1\Product\ProductSaveController;
+use App\Http\Controllers\Api\V1\Purchase\PurchaseDetailController;
 use App\Http\Controllers\Api\V1\Purchase\PurchaseListController;
 use App\Http\Controllers\Api\V1\Purchase\PurchaseSaveController;
 use App\Http\Controllers\Api\V1\Receivable\ReceivableDetailController;
@@ -39,4 +40,5 @@ Route::prefix('v1')->group(function () {
     Route::post('/products/save', [ProductSaveController::class, 'store']);
     Route::get('/purchases', [PurchaseListController::class, 'index']);
     Route::post('/purchases', [PurchaseSaveController::class, 'store']);
+    Route::get('/purchases/{purchaseId}', [PurchaseDetailController::class, 'show'])->whereNumber('purchaseId');
 });
